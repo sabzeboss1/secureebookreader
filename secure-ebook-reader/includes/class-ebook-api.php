@@ -144,39 +144,53 @@ class Secure_Ebook_API {
     public function handle_stream_file($request) {
         $ebook_id  = absint($request['id']);
         $raw_token = sanitize_text_field($request->get_param('token'));
-        $user_id   = get_current_user_id();
 
-        // 1. Authentification requise
-        if (!$user_id) {
+        if (empty($raw_token)) {
             Secure_Ebook_Logger::log(
-                'stream_denied_unauthenticated',
+                'stream_denied_missing_token',
                 'warning',
-                sprintf('Tentative de stream anonyme sur l\'ebook #%d', $ebook_id),
+                sprintf('Tentative de stream sans jeton sur l\'ebook #%d', $ebook_id),
                 0,
                 $ebook_id
             );
-            return new WP_Error('unauthorized', esc_html__('Connexion requise pour accéder au flux de lecture.', 'secure-ebook-reader'), ['status' => 401]);
+            return new WP_Error('forbidden_token', esc_html__('Jeton de lecture manquant.', 'secure-ebook-reader'), ['status' => 403]);
         }
 
-        // 2. Validation stricte du jeton éphémère (Protection Anti-IDOR & Anti-Partage)
-        if (!Secure_Ebook_Security::validate_token($raw_token, $user_id, $ebook_id)) {
+        // 1. Validation cryptographique du jeton éphémère
+        $token_record = Secure_Ebook_Security::get_token_record($raw_token, $ebook_id);
+        if (!$token_record) {
             Secure_Ebook_Logger::log(
                 'stream_denied_invalid_token',
                 'danger',
-                sprintf('Jeton invalide ou usurpé pour utilisateur #%d sur ebook #%d', $user_id, $ebook_id),
-                $user_id,
+                sprintf('Jeton invalide, révoqué ou expiré pour l\'ebook #%d', $ebook_id),
+                0,
                 $ebook_id
             );
             return new WP_Error('forbidden_token', esc_html__('Jeton de lecture invalide, révoqué ou expiré.', 'secure-ebook-reader'), ['status' => 403]);
         }
 
-        // 3. Re-vérification métier centrale des droits (Cas d'un remboursement pendant la session)
-        if (!Secure_Ebook_Access::can_read($user_id, $ebook_id)) {
+        $owner_user_id   = (int) $token_record->user_id;
+        $current_user_id = get_current_user_id();
+
+        // 2. Si une session utilisateur est présente, s'assurer qu'elle correspond au propriétaire du jeton
+        if ($current_user_id > 0 && $current_user_id !== $owner_user_id) {
+            Secure_Ebook_Logger::log(
+                'stream_denied_token_hijack',
+                'danger',
+                sprintf('Tentative d\'usurpation de jeton (propriétaire: #%d, session: #%d, ebook: #%d)', $owner_user_id, $current_user_id, $ebook_id),
+                $current_user_id,
+                $ebook_id
+            );
+            return new WP_Error('forbidden_token', esc_html__('Ce jeton ne correspond pas à votre session.', 'secure-ebook-reader'), ['status' => 403]);
+        }
+
+        // 3. Re-vérification métier stricte des droits d'accès de l'utilisateur (défense en profondeur anti-remboursement)
+        if (!Secure_Ebook_Access::can_read($owner_user_id, $ebook_id)) {
             Secure_Ebook_Logger::log(
                 'stream_denied_access_revoked',
                 'danger',
-                sprintf('Accès métier révoqué pour utilisateur #%d sur ebook #%d', $user_id, $ebook_id),
-                $user_id,
+                sprintf('Accès métier révoqué pour utilisateur #%d sur ebook #%d', $owner_user_id, $ebook_id),
+                $owner_user_id,
                 $ebook_id
             );
             return new WP_Error('access_revoked', esc_html__('Vos droits d\'accès à cet ebook ont été clôturés.', 'secure-ebook-reader'), ['status' => 403]);

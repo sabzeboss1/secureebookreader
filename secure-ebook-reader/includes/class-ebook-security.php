@@ -111,6 +111,38 @@ class Secure_Ebook_Security {
     }
 
     /**
+     * Récupère l'enregistrement d'un jeton valide pour un ebook
+     *
+     * @param string $raw_token Jeton brut
+     * @param int $ebook_id ID de l'ebook
+     * @return object|null Enregistrement du jeton ou null
+     */
+    public static function get_token_record($raw_token, $ebook_id) {
+        if (empty($raw_token) || !is_string($raw_token)) {
+            return null;
+        }
+
+        $token_hash = hash('sha256', $raw_token);
+        $ebook_id   = absint($ebook_id);
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'secure_ebook_tokens';
+        $now   = current_time('mysql');
+
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$table} 
+             WHERE token_hash = %s 
+               AND ebook_id = %d 
+               AND revoked = 0 
+               AND expires_at > %s 
+             LIMIT 1",
+            $token_hash,
+            $ebook_id,
+            $now
+        ));
+    }
+
+    /**
      * Prolonge la validité d'un jeton actif (Heartbeat)
      *
      * @param string $raw_token

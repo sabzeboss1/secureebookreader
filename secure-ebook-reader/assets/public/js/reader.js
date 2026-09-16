@@ -106,6 +106,9 @@
             const loadingTask = pdfjsLib.getDocument({
                 url: streamUrl,
                 withCredentials: true,
+                httpHeaders: {
+                    'X-WP-Nonce': config.nonce
+                },
                 rangeChunkSize: 65536, // Chunks de 64 Ko pour streaming progressif instantané
             });
 
