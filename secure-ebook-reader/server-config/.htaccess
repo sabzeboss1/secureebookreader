@@ -1,0 +1,33 @@
+# ==============================================================================
+# Secure Ebook Reader — Protection Hermétique Apache / LiteSpeed (.htaccess)
+# ==============================================================================
+# Ce fichier doit être placé dans le répertoire contenant les fichiers PDF :
+# wp-content/uploads/secure-ebooks-vault/.htaccess
+#
+# Il interdit strictement tout accès web direct ou téléchargement non autorisé.
+# ==============================================================================
+
+# Apache 2.4+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# Apache 2.2 / Anciennes versions
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+</IfModule>
+
+# Interdiction de l'indexation de répertoire et d'exécution de scripts
+Options -Indexes -ExecCGI
+
+# Double verrou sur toutes les extensions
+<FilesMatch ".*">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Deny,Allow
+        Deny from all
+    </IfModule>
+</FilesMatch>

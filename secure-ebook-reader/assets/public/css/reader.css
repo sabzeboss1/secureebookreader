@@ -1,0 +1,392 @@
+/**
+ * Styles du Lecteur Immersif — Secure Ebook Reader
+ * Design Haut de Gamme & Protection Anti-Piratage
+ */
+
+:root {
+    --reader-bg: #0b0f19;
+    --reader-toolbar-bg: #111827;
+    --reader-toolbar-border: #1f2937;
+    --reader-text: #f3f4f6;
+    --reader-text-muted: #9ca3af;
+    --reader-canvas-bg: #1f2937;
+    --reader-accent: #3b82f6;
+    --reader-accent-hover: #2563eb;
+    --reader-sidebar-bg: #111827;
+}
+
+/* Thème Clair */
+.secure-reader-body.theme-light {
+    --reader-bg: #f3f4f6;
+    --reader-toolbar-bg: #ffffff;
+    --reader-toolbar-border: #e5e7eb;
+    --reader-text: #111827;
+    --reader-text-muted: #6b7280;
+    --reader-canvas-bg: #ffffff;
+    --reader-sidebar-bg: #f9fafb;
+}
+
+/* Thème Sépia */
+.secure-reader-body.theme-sepia {
+    --reader-bg: #f4ecd8;
+    --reader-toolbar-bg: #eadebe;
+    --reader-toolbar-border: #d8caa4;
+    --reader-text: #433422;
+    --reader-text-muted: #7d6b53;
+    --reader-canvas-bg: #fbf7ee;
+    --reader-sidebar-bg: #e5d8b8;
+}
+
+/* Réinitialisation hermétique */
+html.secure-ebook-html, body.secure-reader-body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--reader-bg);
+    color: var(--reader-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* En-tête Toolbar */
+.reader-toolbar {
+    height: 56px;
+    background-color: var(--reader-toolbar-bg);
+    border-bottom: 1px solid var(--reader-toolbar-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 50;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.toolbar-left, .toolbar-center, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--reader-text);
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    text-decoration: none;
+}
+
+.btn-icon:hover {
+    background-color: rgba(125, 125, 125, 0.15);
+}
+
+.book-meta {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-title {
+    font-weight: 600;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.book-author {
+    font-size: 11px;
+    color: var(--reader-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Contrôles de pagination */
+.page-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.page-controls input {
+    width: 48px;
+    height: 30px;
+    text-align: center;
+    background-color: rgba(125, 125, 125, 0.1);
+    border: 1px solid var(--reader-toolbar-border);
+    color: var(--reader-text);
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.page-total {
+    color: var(--reader-text-muted);
+}
+
+/* Zoom & Thèmes */
+.zoom-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: rgba(125, 125, 125, 0.08);
+    padding: 2px 4px;
+    border-radius: 6px;
+}
+
+#zoom-level {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-theme {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: transform 0.1s ease;
+}
+
+.btn-theme:hover {
+    transform: scale(1.2);
+}
+
+/* Zone Principale */
+.reader-main {
+    display: flex;
+    height: calc(100vh - 56px - 4px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Barre Latérale Vignettes */
+.reader-sidebar {
+    width: 240px;
+    background-color: var(--reader-sidebar-bg);
+    border-right: 1px solid var(--reader-toolbar-border);
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -240px;
+    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 40;
+}
+
+.reader-sidebar.is-open {
+    left: 0;
+}
+
+.sidebar-header {
+    height: 48px;
+    padding: 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--reader-toolbar-border);
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.thumbnails-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.thumb-item {
+    cursor: pointer;
+    text-align: center;
+    border-radius: 4px;
+    padding: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.thumb-item:hover, .thumb-item.active {
+    background-color: rgba(59, 130, 246, 0.15);
+}
+
+.thumb-item img, .thumb-item canvas {
+    max-width: 100%;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.thumb-label {
+    font-size: 11px;
+    color: var(--reader-text-muted);
+    margin-top: 4px;
+}
+
+/* Espace Document (Viewport) */
+.viewer-container {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 30px;
+    position: relative;
+    transition: margin-left 0.25s ease;
+}
+
+.reader-sidebar.is-open ~ .viewer-container {
+    margin-left: 240px;
+}
+
+@media (max-width: 768px) {
+    .reader-sidebar.is-open ~ .viewer-container {
+        margin-left: 0;
+    }
+}
+
+/* Conteneur de page */
+.page-wrapper {
+    position: relative;
+    margin: auto;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.15);
+    background-color: #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#pdf-canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* Filigrane Dual-Layer (Overlay DOM) */
+.watermark-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: space-around;
+    user-select: none;
+}
+
+.watermark-token-item {
+    transform: rotate(-30deg);
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    margin: 40px;
+    user-select: none;
+}
+
+/* Spinner de chargement */
+.reader-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 30;
+}
+
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: var(--reader-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Barre de progression inférieure */
+.reading-progress-bar {
+    height: 4px;
+    background-color: rgba(125, 125, 125, 0.2);
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+}
+
+.progress-indicator {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.3s ease;
+}
+
+/* Toast Notification */
+.reader-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: #f8fafc;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
+
+.reader-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Blocage absolu de l'impression */
+@media print {
+    html, body {
+        display: none !important;
+        visibility: hidden !important;
+    }
+}

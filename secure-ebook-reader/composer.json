@@ -1,0 +1,20 @@
+{
+    "name": "secure-ebook-reader/secure-ebook-reader",
+    "description": "Solution professionnelle pour la vente et la lecture sécurisée d'ebooks en ligne sans téléchargement sur WordPress + WooCommerce.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Antigravity",
+            "homepage": "https://antigravity.ai"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "classmap": [
+            "includes/"
+        ]
+    }
+}
